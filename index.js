@@ -11,6 +11,7 @@ app.use("/static", express.static("public"));
 
 app.use(express.urlencoded({ extended: true }));
 
+// connecting to database
 mongoose.connect(process.env.DB_CONNECT, { useNewUrlParser: true }, () => {
   console.log("connected to db");
 
@@ -24,7 +25,8 @@ app.get("/", (req, res) => {
   res.render("todo.ejs", { todoTasks: tasks });
   });
 });
-  
+
+// Add a Todo task to a Todo collection
 app.post("/",async (req, res) => {
   const todoTask = new TodoTask({
   content: req.body.content
@@ -37,7 +39,7 @@ app.post("/",async (req, res) => {
   }
 });
 
-    
+//  Update a particular Todo task 
 app
  .route("/edit/:id")
  .get((req, res) => {
@@ -55,6 +57,7 @@ app
   });
 });
 
+// Delete Todo task
 app.route("/remove/:id").get((req, res) => {
   const id = req.params.id;
   TodoTask.findByIdAndRemove(id, err => {
@@ -64,6 +67,20 @@ app.route("/remove/:id").get((req, res) => {
 });
 
 
+// Retrieve all Todo tasks 
+exports.findAll = (req, res) => {
+  const title = req.query.title;
+  var condition = title ? { title: { $regex: new RegExp(title), $options: "i" } } : {};
 
-
+  Tutorial.find(condition)
+    .then(data => {
+      res.send(data);
+    })
+    .catch(err => {
+      res.status(500).send({
+        message:
+          err.message 
+      });
+    });
+};
 
